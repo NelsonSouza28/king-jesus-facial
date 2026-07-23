@@ -45,9 +45,19 @@ export async function getExternalUsers(): Promise<ExternalUser[]> {
   const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
+    const { supabase } = await import('../lib/supabase');
+    const { data: sessionData } = supabase
+      ? await supabase.auth.getSession()
+      : { data: { session: null } };
+    if (!sessionData.session) throw new Error('Sessão do operador não encontrada.');
+
     const response = await fetch(`${baseUrl}${endpoint}`, {
       method: 'GET',
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionData.session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
       signal: controller.signal,
     });
 
