@@ -13,6 +13,20 @@ function json(body: unknown, status = 200) {
   })
 }
 
+function defaultKey(newVariable: string, legacyVariable: string) {
+  const legacy = Deno.env.get(legacyVariable)
+  if (legacy) return legacy
+
+  const serialized = Deno.env.get(newVariable)
+  if (!serialized) return undefined
+  try {
+    const keys = JSON.parse(serialized)
+    return keys.default || Object.values(keys)[0]
+  } catch {
+    return undefined
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders })
   if (request.method !== 'POST') return json({ erro: 'Método não permitido.' }, 405)
@@ -21,8 +35,8 @@ Deno.serve(async (request) => {
   if (!authorization) return json({ erro: 'Sessão obrigatória.' }, 401)
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
-  const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const anonKey = defaultKey('SUPABASE_PUBLISHABLE_KEYS', 'SUPABASE_ANON_KEY')
+  const serviceRole = defaultKey('SUPABASE_SECRET_KEYS', 'SUPABASE_SERVICE_ROLE_KEY')
   const officialUrl = Deno.env.get('KING_JESUS_API_URL')
   const integrationToken = Deno.env.get('KING_JESUS_INTEGRATION_TOKEN')
   if (!supabaseUrl || !anonKey || !serviceRole || !officialUrl || !integrationToken) {
