@@ -22,6 +22,19 @@ export async function getExternalUsers(): Promise<ExternalUser[]> {
     return demoExternalUsers;
   }
 
+  if (import.meta.env.VITE_USE_EDGE_FUNCTION === 'true') {
+    const { supabase } = await import('../lib/supabase');
+    if (!supabase) throw new Error('Supabase não configurado.');
+    const { data, error } = await supabase.functions.invoke('king-jesus-integration', {
+      body: { operation: 'list-users' },
+    });
+    if (error) throw new Error('Não foi possível consultar os alunos no sistema oficial.');
+    if (!Array.isArray(data)) throw new Error('A API de alunos retornou um formato inválido.');
+    return (data as ExternalUserApiRecord[])
+      .map(normalizeUser)
+      .filter((user) => user.id && user.name && user.active);
+  }
+
   const baseUrl = import.meta.env.VITE_EXTERNAL_API_URL?.trim();
   const endpoint = import.meta.env.VITE_EXTERNAL_USERS_ENDPOINT?.trim();
   if (!baseUrl || !endpoint) {

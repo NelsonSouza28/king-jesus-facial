@@ -98,7 +98,11 @@ export function useFaceRecognition(
           activate(analysis.match.external_user_id, settings.cooldownSeconds);
           setLastEvent(event);
           setVisualState('IDENTIFIED');
-          setStatusMessage('Evento registrado. Integração pendente.');
+          setStatusMessage(
+            event.integration_status === 'SENT'
+              ? 'Presença registrada no KING JESUS.'
+              : 'Evento salvo. O envio ao KING JESUS precisa ser revisado.',
+          );
           holdResultUntilRef.current = Date.now() + 3_000;
           return;
         }

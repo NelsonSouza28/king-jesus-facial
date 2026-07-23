@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StatusBadge } from '../components/StatusBadge';
-import { listRecognitionEvents } from '../services/recognitionEvents';
+import { listRecognitionEvents, sendRecognitionEvent } from '../services/recognitionEvents';
 import type { RecognitionEventListItem } from '../types/facial';
 
 function formatDate(value: string) {
@@ -17,6 +17,7 @@ export function EventsPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('ALL');
   const [date, setDate] = useState('');
+  const [sendingId, setSendingId] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -33,6 +34,19 @@ export function EventsPage() {
   useEffect(() => {
     void load();
   }, []);
+
+  const resend = async (eventId: string) => {
+    setSendingId(eventId);
+    setError('');
+    try {
+      await sendRecognitionEvent(eventId);
+      await load();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Não foi possível reenviar o evento.');
+    } finally {
+      setSendingId('');
+    }
+  };
 
   const filtered = useMemo(() => {
     const term = search.trim().toLocaleLowerCase('pt-BR');
@@ -54,7 +68,7 @@ export function EventsPage() {
         <div>
           <p className="eyebrow">INTEGRAÇÃO</p>
           <h1>Eventos</h1>
-          <p>Acompanhe os reconhecimentos registrados. O envio ao sistema oficial será ativado na próxima etapa.</p>
+          <p>Acompanhe os reconhecimentos e o envio de presença ao sistema oficial.</p>
         </div>
         <button className="button button-secondary compact-button" type="button" onClick={() => void load()}>
           Atualizar
@@ -117,6 +131,16 @@ export function EventsPage() {
                 <div className="event-integration">
                   <StatusBadge status={event.integration_status} />
                   <small>{event.retry_count} tentativa(s)</small>
+                  {event.integration_status !== 'SENT' && (
+                    <button
+                      className="event-retry"
+                      type="button"
+                      disabled={sendingId === event.id}
+                      onClick={() => void resend(event.id)}
+                    >
+                      {sendingId === event.id ? 'Enviando…' : 'Reenviar'}
+                    </button>
+                  )}
                 </div>
               </article>
             ))}
