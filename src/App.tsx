@@ -10,6 +10,12 @@ import { StagePage } from './pages/StagePage';
 const RegistrationPage = lazy(() =>
   import('./pages/RegistrationPage').then((module) => ({ default: module.RegistrationPage })),
 );
+const RecognitionPage = lazy(() =>
+  import('./pages/RecognitionPage').then((module) => ({ default: module.RecognitionPage })),
+);
+const EventsPage = lazy(() =>
+  import('./pages/EventsPage').then((module) => ({ default: module.EventsPage })),
+);
 
 function App() {
   return (
@@ -29,11 +35,9 @@ function App() {
           <Route
             path="reconhecimento"
             element={
-              <StagePage
-                page="reconhecimento"
-                eyebrow="IDENTIFICAÇÃO"
-                description="Use a câmera para localizar o perfil facial e gerar um evento."
-              />
+              <Suspense fallback={<LoadingState label="Carregando reconhecimento…" />}>
+                <RecognitionPage />
+              </Suspense>
             }
           />
           <Route
@@ -49,11 +53,9 @@ function App() {
           <Route
             path="eventos"
             element={
-              <StagePage
-                page="eventos"
-                eyebrow="INTEGRAÇÃO"
-                description="Acompanhe reconhecimentos e o envio ao sistema principal."
-              />
+              <Suspense fallback={<LoadingState label="Carregando eventos…" />}>
+                <EventsPage />
+              </Suspense>
             }
           />
         </Route>
