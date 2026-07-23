@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { StatusBadge } from '../components/StatusBadge';
-import { listRecognitionEvents, sendRecognitionEvent } from '../services/recognitionEvents';
+import {
+  deleteFailedRecognitionEvent,
+  listRecognitionEvents,
+  sendRecognitionEvent,
+} from '../services/recognitionEvents';
 import type { RecognitionEventListItem } from '../types/facial';
 
 function formatDate(value: string) {
@@ -43,6 +47,20 @@ export function EventsPage() {
       await load();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Não foi possível reenviar o evento.');
+    } finally {
+      setSendingId('');
+    }
+  };
+
+  const remove = async (eventId: string) => {
+    if (!window.confirm('Excluir este evento com falha?')) return;
+    setSendingId(eventId);
+    setError('');
+    try {
+      await deleteFailedRecognitionEvent(eventId);
+      setEvents((current) => current.filter((event) => event.id !== eventId));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Não foi possível excluir o evento.');
     } finally {
       setSendingId('');
     }
@@ -132,14 +150,24 @@ export function EventsPage() {
                   <StatusBadge status={event.integration_status} />
                   <small>{event.retry_count} tentativa(s)</small>
                   {event.integration_status !== 'SENT' && (
-                    <button
-                      className="event-retry"
-                      type="button"
-                      disabled={sendingId === event.id}
-                      onClick={() => void resend(event.id)}
-                    >
-                      {sendingId === event.id ? 'Enviando…' : 'Reenviar'}
-                    </button>
+                    <>
+                      <button
+                        className="event-retry"
+                        type="button"
+                        disabled={sendingId === event.id}
+                        onClick={() => void resend(event.id)}
+                      >
+                        {sendingId === event.id ? 'Enviando…' : 'Reenviar'}
+                      </button>
+                      <button
+                        className="event-delete"
+                        type="button"
+                        disabled={sendingId === event.id}
+                        onClick={() => void remove(event.id)}
+                      >
+                        Excluir
+                      </button>
+                    </>
                   )}
                 </div>
               </article>

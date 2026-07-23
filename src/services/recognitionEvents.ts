@@ -48,7 +48,15 @@ export async function sendRecognitionEvent(eventId: string): Promise<Recognition
     const { data: sessionData } = await supabase.auth.getSession();
     const { data: event } = await supabase
       .from('recognition_events')
-      .select('id, external_user_id, confidence, distance, recognized_at, retry_count')
+      .select(`
+        id,
+        external_user_id,
+        confidence,
+        distance,
+        recognized_at,
+        retry_count,
+        face_profile:face_profiles!recognition_events_face_profile_id_fkey(class_name)
+      `)
       .eq('id', eventId)
       .single();
     if (!baseUrl || !endpoint || !sessionData.session || !event) {
@@ -61,6 +69,10 @@ export async function sendRecognitionEvent(eventId: string): Promise<Recognition
       external_error: null,
     }).eq('id', eventId);
     try {
+      const linkedProfile = event.face_profile as unknown as
+        | { class_name: string | null }
+        | { class_name: string | null }[]
+        | null;
       const response = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -75,6 +87,9 @@ export async function sendRecognitionEvent(eventId: string): Promise<Recognition
           confidence: event.confidence,
           distance: event.distance,
           recognized_at: event.recognized_at,
+          class_name: Array.isArray(linkedProfile)
+            ? linkedProfile[0]?.class_name
+            : linkedProfile?.class_name,
         }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -134,4 +149,14 @@ export async function listRecognitionEvents(): Promise<RecognitionEventListItem[
 
   if (error) throw new Error('Não foi possível carregar os eventos.');
   return (data ?? []) as unknown as RecognitionEventListItem[];
+}
+
+export async function deleteFailedRecognitionEvent(eventId: string) {
+  if (!supabase) throw new Error('Supabase não configurado.');
+  const { error } = await supabase
+    .from('recognition_events')
+    .delete()
+    .eq('id', eventId)
+    .in('integration_status', ['FAILED', 'PENDING']);
+  if (error) throw new Error('Não foi possível excluir o evento.');
 }
