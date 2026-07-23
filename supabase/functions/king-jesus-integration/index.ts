@@ -47,6 +47,7 @@ Deno.serve(async (request) => {
     !integrationToken && 'KING_JESUS_INTEGRATION_TOKEN',
   ].filter(Boolean)
   if (missing.length) {
+    console.error(`Variáveis ausentes: ${missing.join(', ')}`)
     return json({
       erro: 'Integração não configurada no servidor.',
       variaveis_ausentes: missing,
