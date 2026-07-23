@@ -10,10 +10,10 @@ export function InstallAppCard() {
       await install();
       return;
     }
-    if (state !== 'installed') {
-      setShowInstructions(true);
-    }
+    setShowInstructions(true);
   };
+
+  if (state === 'installed') return null;
 
   return (
     <>
@@ -21,25 +21,18 @@ export function InstallAppCard() {
         <div className="install-app-icon" aria-hidden="true">KJ</div>
         <div className="install-copy">
           <p className="eyebrow">ACESSO RÁPIDO NO CELULAR</p>
-          <h2>{state === 'installed' ? 'KJ Facial instalado' : 'Instale o KJ Facial'}</h2>
-          <p>
-            {state === 'installed'
-              ? 'O aplicativo já pode ser aberto pela tela inicial do aparelho.'
-              : 'Use em tela cheia, direto pela tela inicial e sempre na versão mais recente.'}
-          </p>
+          <h2>Instale o KJ Facial</h2>
+          <p>Acesso rápido e em tela cheia diretamente pelo ícone do aparelho.</p>
         </div>
         <button
           type="button"
-          className={`button ${state === 'installed' ? 'button-installed' : 'button-install'}`}
+          className="button button-install"
           onClick={() => void handleAction()}
-          disabled={state === 'installed'}
         >
-          <span aria-hidden="true">{state === 'installed' ? '✓' : '↓'}</span>
+          <span aria-hidden="true">↓</span>
           {state === 'available'
             ? 'Instalar agora'
-            : state === 'installed'
-              ? 'Instalado'
-              : 'Como instalar'}
+            : 'Como instalar'}
         </button>
       </section>
 

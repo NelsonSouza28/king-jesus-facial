@@ -316,7 +316,7 @@ export function RegistrationPage() {
               {modelsStatus && (
                 <div className="model-loading" aria-live="polite">
                   <span className="spinner" />
-                  <div><b>Preparando inteligência facial</b><p>{modelsStatus}</p></div>
+                  <div><b>Preparando câmera</b><p>{modelsStatus}</p></div>
                 </div>
               )}
 
@@ -338,7 +338,7 @@ export function RegistrationPage() {
                     <span><b>{Math.round(capture.quality.brightness)}</b> luminosidade</span>
                     <span><b>{Math.round(capture.quality.sharpness)}</b> nitidez</span>
                   </div>
-                  <p className="liveness-note">Verificação simples: confirme visualmente que a pessoa olhou para a câmera. Isto não constitui prova de vida robusta.</p>
+                  <p className="liveness-note">Confira se a imagem corresponde ao aluno selecionado antes de concluir.</p>
                   <div className="review-actions">
                     <button className="button button-secondary" type="button" onClick={() => void openCamera()} disabled={saving}>
                       Capturar novamente

@@ -58,7 +58,7 @@ export function RecognitionPage() {
         <div>
           <p className="eyebrow">IDENTIFICAÇÃO</p>
           <h1>Reconhecimento</h1>
-          <p>Posicione uma pessoa por vez. O sistema analisa um frame por intervalo e registra apenas identificações dentro do limite configurado.</p>
+          <p>Posicione uma pessoa por vez em frente à câmera para registrar a identificação.</p>
         </div>
         <span className={`connection-pill ${online ? 'connection-online' : 'connection-offline'}`}>
           <i /> {online ? 'Conectado' : 'Sem conexão'}
@@ -143,21 +143,14 @@ export function RecognitionPage() {
             <article className="match-details">
               <div><span>Aluno</span><b>{recognition.lastMatch.external_user_name}</b></div>
               <div><span>ID externo</span><b>{recognition.lastMatch.external_user_id}</b></div>
-              <div><span>Indicador técnico</span><b>{Math.round(recognition.lastMatch.similarity * 100)}%</b></div>
-              <div><span>Distância</span><b>{recognition.lastMatch.distance.toFixed(4)}</b></div>
+              <div><span>Confiança da identificação</span><b>{Math.round(recognition.lastMatch.similarity * 100)}%</b></div>
+              <div><span>Turma</span><b>{recognition.lastMatch.class_name || 'Não informada'}</b></div>
               {recognition.lastEvent && (
                 <div><span>Integração</span><StatusBadge status={recognition.lastEvent.integration_status} /></div>
               )}
-              <small>A similaridade é apenas um indicador técnico e não representa certeza absoluta.</small>
+              <small>Confira o nome e a turma antes de prosseguir.</small>
             </article>
           )}
-
-          <div className="recognition-config">
-            <p className="eyebrow">CONFIGURAÇÃO ATIVA</p>
-            <div><span>Intervalo de análise</span><b>{recognition.settings?.intervalMs ?? 1000} ms</b></div>
-            <div><span>Cooldown por aluno</span><b>{recognition.settings?.cooldownSeconds ?? 30} s</b></div>
-            <div><span>Limite inicial</span><b>{recognition.settings?.matchThreshold ?? 0.65}</b></div>
-          </div>
 
           <Link className="button button-secondary" to="/cadastro">Abrir cadastro facial</Link>
         </aside>

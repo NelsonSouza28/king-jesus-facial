@@ -10,6 +10,7 @@ import {
   analyzeRecognitionFrame,
   getRecognitionSettings,
 } from '../services/faceRecognition';
+import { getExternalUsers } from '../services/externalUsers';
 import { createRecognitionEvent } from '../services/recognitionEvents';
 import type {
   FaceMatch,
@@ -48,6 +49,7 @@ export function useFaceRecognition(
     const [nextSettings] = await Promise.all([
       getRecognitionSettings(),
       loadHumanModels(setStatusMessage),
+      getExternalUsers(),
     ]);
     setSettings(nextSettings);
     setVisualState('SEARCHING');

@@ -16,6 +16,32 @@ function normalizeUser(record: ExternalUserApiRecord): ExternalUser {
   };
 }
 
+async function syncProfileMetadata(users: ExternalUser[]) {
+  const { supabase } = await import('../lib/supabase');
+  if (!supabase) return;
+  await Promise.allSettled(
+    users.map((user) =>
+      supabase
+        .from('face_profiles')
+        .update({
+          external_user_name: user.name,
+          registration_number: user.registrationNumber,
+          class_name: user.className,
+        })
+        .eq('external_user_id', user.id)
+        .eq('active', true),
+    ),
+  );
+}
+
+async function finalizeUsers(records: ExternalUserApiRecord[]) {
+  const users = records
+    .map(normalizeUser)
+    .filter((user) => user.id && user.name && user.active);
+  await syncProfileMetadata(users);
+  return users;
+}
+
 export async function getExternalUsers(): Promise<ExternalUser[]> {
   if (import.meta.env.VITE_USE_DEMO_EXTERNAL_USERS === 'true') {
     await new Promise((resolve) => window.setTimeout(resolve, 350));
@@ -30,9 +56,7 @@ export async function getExternalUsers(): Promise<ExternalUser[]> {
     });
     if (error) throw new Error('Não foi possível consultar os alunos no sistema oficial.');
     if (!Array.isArray(data)) throw new Error('A API de alunos retornou um formato inválido.');
-    return (data as ExternalUserApiRecord[])
-      .map(normalizeUser)
-      .filter((user) => user.id && user.name && user.active);
+    return finalizeUsers(data as ExternalUserApiRecord[]);
   }
 
   const baseUrl = import.meta.env.VITE_EXTERNAL_API_URL?.trim();
@@ -70,9 +94,7 @@ export async function getExternalUsers(): Promise<ExternalUser[]> {
       throw new Error('A API de alunos retornou um formato inválido.');
     }
 
-    return (payload as ExternalUserApiRecord[])
-      .map(normalizeUser)
-      .filter((user) => user.id && user.name && user.active);
+    return finalizeUsers(payload as ExternalUserApiRecord[]);
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error('A consulta de alunos demorou mais que o esperado.');

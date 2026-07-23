@@ -6,6 +6,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export type InstallState = 'available' | 'installed' | 'ios' | 'instructions';
+const INSTALL_STORAGE_KEY = 'kj-facial-installed';
 
 function isStandalone() {
   return (
@@ -21,7 +22,7 @@ function isIOS() {
 export function useInstallApp() {
   const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [state, setState] = useState<InstallState>(() => {
-    if (isStandalone()) return 'installed';
+    if (isStandalone() || localStorage.getItem(INSTALL_STORAGE_KEY) === 'true') return 'installed';
     return isIOS() ? 'ios' : 'instructions';
   });
 
@@ -33,6 +34,7 @@ export function useInstallApp() {
     };
 
     const handleInstalled = () => {
+      localStorage.setItem(INSTALL_STORAGE_KEY, 'true');
       setPromptEvent(null);
       setState('installed');
     };
@@ -54,6 +56,7 @@ export function useInstallApp() {
     setPromptEvent(null);
 
     if (choice.outcome === 'accepted') {
+      localStorage.setItem(INSTALL_STORAGE_KEY, 'true');
       setState('installed');
       return true;
     }
