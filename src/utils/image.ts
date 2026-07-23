@@ -68,9 +68,12 @@ function qualityForFace(
   const roll = Math.abs(face.rotation?.angle.roll ?? 0);
   const yaw = Math.abs(face.rotation?.angle.yaw ?? 0);
   const pitch = Math.abs(face.rotation?.angle.pitch ?? 0);
-  const eyesVisible =
-    (face.annotations.leftEye?.length ?? 0) > 0
-    && (face.annotations.rightEye?.length ?? 0) > 0;
+  const annotationEntries = Object.entries(face.annotations ?? {});
+  const hasEyeLandmarks = (side: 'left' | 'right') =>
+    annotationEntries.some(
+      ([name, points]) => name.startsWith(`${side}Eye`) && points.length > 0,
+    );
+  const eyesVisible = hasEyeLandmarks('left') && hasEyeLandmarks('right');
 
   const base = { brightness, sharpness, faceAreaRatio, faceConfidence };
   if (faceAreaRatio < 0.1 || Math.min(face.box[2], face.box[3]) < 120) {
