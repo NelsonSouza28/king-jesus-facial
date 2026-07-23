@@ -37,8 +37,8 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const anonKey = defaultKey('SUPABASE_PUBLISHABLE_KEYS', 'SUPABASE_ANON_KEY')
   const serviceRole = defaultKey('SUPABASE_SECRET_KEYS', 'SUPABASE_SERVICE_ROLE_KEY')
-  const officialUrl = Deno.env.get('KING_JESUS_API_URL')
-  const integrationToken = Deno.env.get('KING_JESUS_INTEGRATION_TOKEN')
+  const officialUrl = Deno.env.get('KING_JESUS_API_URL')?.trim()
+  const integrationToken = Deno.env.get('KING_JESUS_INTEGRATION_TOKEN')?.trim()
   const missing = [
     !supabaseUrl && 'SUPABASE_URL',
     !anonKey && 'SUPABASE_PUBLISHABLE_KEYS/SUPABASE_ANON_KEY',
@@ -63,7 +63,12 @@ Deno.serve(async (request) => {
   let input: { operation?: string; event_id?: string }
   try {
     input = await request.json()
-  } catch {
+  } catch (error) {
+    console.error(
+      `Falha ao acessar API oficial: ${
+        error instanceof Error ? error.message : 'erro desconhecido'
+      }`,
+    )
     return json({ erro: 'Corpo JSON inválido.' }, 400)
   }
 
