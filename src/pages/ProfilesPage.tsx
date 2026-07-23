@@ -77,6 +77,7 @@ export function ProfilesPage() {
               <div className="profile-copy">
                 <h2>{profile.external_user_name}</h2>
                 <p>{profile.class_name || 'Turma não informada'}</p>
+                <small>{profile.registration_number || 'Matrícula em sincronização'}</small>
                 <small>Cadastrado em {new Intl.DateTimeFormat('pt-BR').format(new Date(profile.created_at))}</small>
               </div>
               <button

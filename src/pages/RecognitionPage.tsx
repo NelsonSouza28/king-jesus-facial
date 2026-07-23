@@ -142,6 +142,7 @@ export function RecognitionPage() {
           {recognition.lastMatch && (
             <article className="match-details">
               <div><span>Aluno</span><b>{recognition.lastMatch.external_user_name}</b></div>
+              <div><span>Matrícula</span><b>{recognition.lastMatch.registration_number || 'Em sincronização'}</b></div>
               <div><span>ID externo</span><b>{recognition.lastMatch.external_user_id}</b></div>
               <div><span>Confiança da identificação</span><b>{Math.round(recognition.lastMatch.similarity * 100)}%</b></div>
               <div><span>Turma</span><b>{recognition.lastMatch.class_name || 'Não informada'}</b></div>
