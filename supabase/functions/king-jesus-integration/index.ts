@@ -39,8 +39,18 @@ Deno.serve(async (request) => {
   const serviceRole = defaultKey('SUPABASE_SECRET_KEYS', 'SUPABASE_SERVICE_ROLE_KEY')
   const officialUrl = Deno.env.get('KING_JESUS_API_URL')
   const integrationToken = Deno.env.get('KING_JESUS_INTEGRATION_TOKEN')
-  if (!supabaseUrl || !anonKey || !serviceRole || !officialUrl || !integrationToken) {
-    return json({ erro: 'Integração não configurada no servidor.' }, 503)
+  const missing = [
+    !supabaseUrl && 'SUPABASE_URL',
+    !anonKey && 'SUPABASE_PUBLISHABLE_KEYS/SUPABASE_ANON_KEY',
+    !serviceRole && 'SUPABASE_SECRET_KEYS/SUPABASE_SERVICE_ROLE_KEY',
+    !officialUrl && 'KING_JESUS_API_URL',
+    !integrationToken && 'KING_JESUS_INTEGRATION_TOKEN',
+  ].filter(Boolean)
+  if (missing.length) {
+    return json({
+      erro: 'Integração não configurada no servidor.',
+      variaveis_ausentes: missing,
+    }, 503)
   }
 
   const authClient = createClient(supabaseUrl, anonKey, {
