@@ -5,7 +5,6 @@ import { LoadingState } from './components/LoadingState';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
-import { StagePage } from './pages/StagePage';
 
 const RegistrationPage = lazy(() =>
   import('./pages/RegistrationPage').then((module) => ({ default: module.RegistrationPage })),
@@ -15,6 +14,9 @@ const RecognitionPage = lazy(() =>
 );
 const EventsPage = lazy(() =>
   import('./pages/EventsPage').then((module) => ({ default: module.EventsPage })),
+);
+const ProfilesPage = lazy(() =>
+  import('./pages/ProfilesPage').then((module) => ({ default: module.ProfilesPage })),
 );
 
 function App() {
@@ -43,11 +45,9 @@ function App() {
           <Route
             path="perfis"
             element={
-              <StagePage
-                page="perfis"
-                eyebrow="BASE FACIAL"
-                description="Consulte e administre vínculos faciais sem expor descritores."
-              />
+              <Suspense fallback={<LoadingState label="Carregando perfis…" />}>
+                <ProfilesPage />
+              </Suspense>
             }
           />
           <Route

@@ -4,6 +4,17 @@ import type { ExternalUser } from '../types/external';
 import type { FaceMatch, SafeFaceProfile } from '../types/facial';
 import { removeFaceImage, uploadFaceImage } from './storage';
 
+export async function listActiveFaceProfiles(): Promise<SafeFaceProfile[]> {
+  if (!supabase) throw new Error('Supabase não configurado.');
+  const { data, error } = await supabase
+    .from('face_profiles_safe')
+    .select('*')
+    .eq('active', true)
+    .order('external_user_name');
+  if (error) throw new Error('Não foi possível carregar os perfis faciais.');
+  return (data ?? []) as SafeFaceProfile[];
+}
+
 export async function getActiveProfile(externalUserId: string) {
   if (!supabase) throw new Error('Supabase não configurado.');
   const { data, error } = await supabase

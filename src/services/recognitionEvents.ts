@@ -153,10 +153,9 @@ export async function listRecognitionEvents(): Promise<RecognitionEventListItem[
 
 export async function deleteFailedRecognitionEvent(eventId: string) {
   if (!supabase) throw new Error('Supabase não configurado.');
-  const { error } = await supabase
-    .from('recognition_events')
-    .delete()
-    .eq('id', eventId)
-    .in('integration_status', ['FAILED', 'PENDING']);
-  if (error) throw new Error('Não foi possível excluir o evento.');
+  const { data, error } = await supabase.rpc('delete_failed_recognition_event', {
+    event_id: eventId,
+  });
+  if (error) throw new Error(`Não foi possível excluir: ${error.message}`);
+  if (!data) throw new Error('Somente eventos pendentes ou com falha podem ser excluídos.');
 }

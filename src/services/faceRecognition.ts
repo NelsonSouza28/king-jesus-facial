@@ -54,12 +54,23 @@ export async function analyzeRecognitionFrame(
     return { kind: 'NO_FACE' };
   }
 
-  const result = await detectFaces(video);
+  const analysisCanvas = document.createElement('canvas');
+  const scale = Math.min(1, 640 / Math.max(video.videoWidth, video.videoHeight));
+  analysisCanvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+  analysisCanvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+  analysisCanvas.getContext('2d')?.drawImage(
+    video,
+    0,
+    0,
+    analysisCanvas.width,
+    analysisCanvas.height,
+  );
+  const result = await detectFaces(analysisCanvas);
   if (result.face.length === 0) return { kind: 'NO_FACE' };
   if (result.face.length > 1) return { kind: 'MULTIPLE_FACES' };
 
   const face = result.face[0];
-  const videoArea = video.videoWidth * video.videoHeight;
+  const videoArea = analysisCanvas.width * analysisCanvas.height;
   const faceArea = face.box[2] * face.box[3];
   if (!videoArea || faceArea / videoArea < 0.06) {
     return { kind: 'FACE_TOO_SMALL' };
